@@ -1,4 +1,5 @@
 export type Source = {
+  kind?: "VIDEO" | "READING" | "COURSE";
   title: string;
   provider: string;
   range: string;
@@ -64,6 +65,7 @@ export const stages = [
 ];
 
 const courseraSocial: Source = {
+  kind: "COURSE",
   title: "Social Psychology",
   provider: "Wesleyan University / Coursera",
   range: "Week 1: The Psychology of Self-Presentation（動画・確認問題）",
@@ -72,6 +74,7 @@ const courseraSocial: Source = {
   url: "https://www.coursera.org/learn/social-psychology",
 };
 const courseraMarketing: Source = {
+  kind: "COURSE",
   title: "Introduction to Marketing",
   provider: "University of Pennsylvania / Coursera",
   range: "Module 1: Branding—Marketing Strategy and Brand Positioning",
@@ -80,6 +83,7 @@ const courseraMarketing: Source = {
   url: "https://www.coursera.org/learn/wharton-marketing",
 };
 const courseraAnalytics: Source = {
+  kind: "COURSE",
   title: "Customer Analytics",
   provider: "University of Pennsylvania / Coursera",
   range: "Module 2: Descriptive Analytics—Customer Base Audit",
@@ -88,6 +92,7 @@ const courseraAnalytics: Source = {
   url: "https://www.coursera.org/learn/wharton-customer-analytics",
 };
 const negotiation: Source = {
+  kind: "COURSE",
   title: "Successful Negotiation",
   provider: "University of Michigan / Coursera",
   range: "Module 1: Prepare—BATNA, reservation price, interests",
@@ -96,6 +101,7 @@ const negotiation: Source = {
   url: "https://www.coursera.org/learn/negotiation-skills",
 };
 const jtbd: Source = {
+  kind: "READING",
   title: "Know Your Customers’ Jobs to Be Done",
   provider: "Harvard Business Review",
   range: "全文：状況・進歩・雇用する解決策の節",
@@ -104,6 +110,7 @@ const jtbd: Source = {
   url: "https://hbr.org/2016/09/know-your-customers-jobs-to-be-done",
 };
 const testLearn: Source = {
+  kind: "READING",
   title: "Test, Learn, Adapt",
   provider: "UK Cabinet Office",
   range: "pp. 4–18: RCTの原則、介入群と比較群",
@@ -112,6 +119,7 @@ const testLearn: Source = {
   url: "https://www.gov.uk/government/publications/test-learn-adapt-developing-public-policy-with-randomised-controlled-trials",
 };
 const wells: Source = {
+  kind: "READING",
   title: "CFPB Fines Wells Fargo $100 Million",
   provider: "Consumer Financial Protection Bureau",
   range: "不正口座の行動・報酬制度・処分額",
@@ -120,6 +128,7 @@ const wells: Source = {
   url: "https://www.consumerfinance.gov/about-us/newsroom/consumer-financial-protection-bureau-fines-wells-fargo-100-million-widespread-illegal-practice-secretly-opening-unauthorized-accounts/",
 };
 const zoom: Source = {
+  kind: "READING",
   title: "Zoom Video Communications S-1",
   provider: "U.S. SEC",
   range: "Prospectus Summary / Our Customers / VMware case",
@@ -128,6 +137,7 @@ const zoom: Source = {
   url: "https://www.sec.gov/Archives/edgar/data/1585521/000119312519083351/d642624ds1.htm",
 };
 const slack: Source = {
+  kind: "READING",
   title: "Slack Technologies S-1",
   provider: "U.S. SEC",
   range: "Business / Customers / Growth Strategy",
@@ -136,6 +146,7 @@ const slack: Source = {
   url: "https://www.sec.gov/Archives/edgar/data/1764925/000162828019004786/slacks-1.htm",
 };
 const airbnb: Source = {
+  kind: "READING",
   title: "Airbnb S-1",
   provider: "U.S. SEC",
   range: "COVID-19 impact / Trust / Community",
@@ -144,14 +155,16 @@ const airbnb: Source = {
   url: "https://www.sec.gov/Archives/edgar/data/1559720/000119312520294801/d81668ds1.htm",
 };
 const peloton: Source = {
+  kind: "READING",
   title: "Peloton FY2022 Form 10-K",
   provider: "U.S. SEC",
-  range: "Business / Risk Factors / MD&A",
+  range: "p.5（Business概況）／pp.49–53（Connected Fitness・Subscription・売上構成）",
   minutes: 36,
   purpose: "売上減と会員基盤増を分け、単一指標の誤診を避ける",
-  url: "https://www.sec.gov/Archives/edgar/data/1639825/000163982522000111/pton-20220630.htm",
+  url: "https://www.sec.gov/Archives/edgar/data/1639825/000163982522000117/pton-20220630.htm",
 };
 const adobe: Source = {
+  kind: "READING",
   title: "Adobe FY2013 Form 10-K",
   provider: "U.S. SEC",
   range: "Creative Cloud transition / Revenue recognition / Risk",
@@ -160,6 +173,7 @@ const adobe: Source = {
   url: "https://www.sec.gov/Archives/edgar/data/796343/000079634314000004/adbe10kfy13.htm",
 };
 const costco: Source = {
+  kind: "READING",
   title: "Costco FY2025 Annual Report",
   provider: "Costco Investor Relations",
   range: "Business model / Membership / Net sales",
@@ -168,6 +182,7 @@ const costco: Source = {
   url: "https://investor.costco.com/financials/annual-reports-and-proxy-statements/default.aspx",
 };
 const duolingo: Source = {
+  kind: "READING",
   title: "Duolingo Q1 FY2026 Shareholder Letter",
   provider: "Duolingo Investor Relations",
   range: "DAU / paid subscribers / subscription bookings",
@@ -176,6 +191,7 @@ const duolingo: Source = {
   url: "https://investors.duolingo.com/financials/quarterly-results/default.aspx",
 };
 const autoEnroll: Source = {
+  kind: "READING",
   title: "Workplace pension participation and savings trends",
   provider: "UK Department for Work and Pensions",
   range: "Eligible employee participation / automatic enrolment trend",
@@ -184,6 +200,7 @@ const autoEnroll: Source = {
   url: "https://www.gov.uk/government/statistics/workplace-pension-participation-and-savings-trends-2009-to-2024",
 };
 const amazonFTC: Source = {
+  kind: "READING",
   title: "FTC Secures $2.5 Billion Settlement with Amazon",
   provider: "U.S. Federal Trade Commission",
   range: "Prime enrollment and cancellation allegations / remedy",

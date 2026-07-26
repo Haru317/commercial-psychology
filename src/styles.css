@@ -340,6 +340,24 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px sol
 .difference-arrow { display: grid; place-items: center; color: var(--pink); }
 
 .lesson { min-height: calc(100vh - 72px); }
+.day-switcher {
+  position: sticky;
+  top: 72px;
+  z-index: 34;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 9px 5vw;
+  background: rgba(247, 248, 252, .96);
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: thin;
+}
+.day-switcher button { flex: 0 0 112px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; background: white; text-align: left; cursor: pointer; }
+.day-switcher button small { display: block; color: #9aa3b7; font: 700 8px var(--font-geist-mono); }
+.day-switcher button span { display: block; overflow: hidden; margin-top: 2px; color: var(--muted); font-size: 9px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.day-switcher button.active { color: white; background: var(--navy); border-color: var(--navy); box-shadow: 0 5px 16px rgba(23, 40, 79, .18); }
+.day-switcher button.active small, .day-switcher button.active span { color: white; }
+.day-switcher button.done:not(.active) { border-color: color-mix(in srgb, var(--green) 35%, white); background: #effaf7; }
 .lesson-hero { min-height: 166px; padding: 35px 5vw; background: linear-gradient(125deg, var(--navy), #253b6d); color: white; display: grid; grid-template-columns: 76px 1fr auto; gap: 24px; align-items: center; }
 .lesson-day { width: 70px; height: 80px; border: 1px solid rgba(255,255,255,.2); border-radius: 16px; background: rgba(255,255,255,.06); display: grid; place-items: center; align-content: center; }
 .lesson-day small { color: #9eb0d6; font-size: 7px; font-weight: 850; letter-spacing: .16em; }
@@ -366,6 +384,20 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px sol
 .lesson-tabs button.active { color: var(--navy); border-color: var(--accent); }
 .lesson-body { max-width: 930px; margin: 0 auto; padding: 43px 48px 100px; }
 .content-flow { display: grid; gap: 25px; }
+.daily-brief { overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent) 28%, white); border-radius: 20px; background: white; box-shadow: var(--shadow); }
+.daily-brief > header { padding: 28px 32px; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; background: linear-gradient(130deg, color-mix(in srgb, var(--accent) 13%, white), white); }
+.daily-brief header small, .brief-grid small { color: var(--accent); font-size: 8px; font-weight: 850; letter-spacing: .14em; }
+.daily-brief h2 { max-width: 760px; margin: 8px 0 0; color: var(--navy); font-family: Georgia, "Yu Mincho", serif; font-size: clamp(24px, 3vw, 36px); line-height: 1.3; font-weight: 500; }
+.brief-time { flex: 0 0 auto; padding: 8px 11px; border: 1px solid color-mix(in srgb, var(--accent) 28%, white); border-radius: 9px; color: var(--navy); font-size: 9px; font-weight: 800; }
+.brief-grid { display: grid; grid-template-columns: repeat(2, 1fr); }
+.brief-grid article { min-width: 0; padding: 22px 26px; border-top: 1px solid var(--line); }
+.brief-grid article:nth-child(odd) { border-right: 1px solid var(--line); }
+.brief-grid h3 { margin: 5px 0 7px; color: var(--navy); font-size: 14px; }
+.brief-grid p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.brief-route { display: flex; align-items: stretch; padding: 15px 20px; background: var(--navy); color: white; }
+.brief-route > span { min-width: 0; flex: 1; font-size: 8px; line-height: 1.45; }
+.brief-route b { display: block; margin-bottom: 2px; color: var(--yellow); font-size: 7px; letter-spacing: .1em; }
+.brief-route > .icon { flex: 0 0 auto; align-self: center; margin: 0 9px; color: #8ea2ce; }
 .today-question { padding: 42px; border-radius: 20px; background: linear-gradient(130deg, color-mix(in srgb, var(--accent) 12%, white), #fff); border: 1px solid color-mix(in srgb, var(--accent) 24%, white); }
 .today-question small { color: var(--accent); font-size: 8px; font-weight: 850; letter-spacing: .16em; }
 .today-question h2 { max-width: 720px; margin: 10px 0 0; color: var(--navy); font-family: Georgia, "Yu Mincho", serif; font-size: clamp(25px, 3.4vw, 39px); line-height: 1.35; font-weight: 500; }
@@ -427,7 +459,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px sol
 .source-heading > span { align-self: center; padding: 7px 9px; border-radius: 8px; background: var(--blue-soft); color: var(--blue); font-size: 8px; font-weight: 750; }
 .source-card { margin-top: 8px; padding: 17px; border: 1px solid #e4e8f1; border-radius: 12px; color: inherit; text-decoration: none; display: grid; grid-template-columns: 30px 1fr auto; gap: 13px; transition: .18s ease; }
 .source-card:hover { border-color: #bdcaef; background: #fbfcff; transform: translateY(-1px); }
-.source-index { color: #a1acc4; font-family: var(--font-geist-mono); font-size: 9px; }
+.source-index { min-width: 54px; color: var(--blue); font-family: var(--font-geist-mono); font-size: 8px; font-weight: 800; letter-spacing: .08em; }
 .source-card small { color: var(--blue); font-size: 7px; font-weight: 800; }
 .source-card h4 { margin: 3px 0 6px; color: var(--navy); font-size: 12px; }
 .source-card p { margin: 3px 0; color: var(--muted); font-size: 8.5px; line-height: 1.6; }
@@ -666,7 +698,11 @@ textarea:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0
   .lesson-time b { font-size: 13px; }
   .lesson-tabs button { min-width: 135px; height: 58px; font-size: 14px; }
   .lesson-body { max-width: 1120px; }
-  .today-question small, .connection-row small, .two-col small, .section-head small, .theory-grid small, .source-heading small, .brief-label, .track-title small, .answer-levels small, .drill-top span, .drill-top small, .independent-head small, .transfer-badge, .tomorrow-card small, .integration-card small { font-size: 12px; }
+  .today-question small, .daily-brief header small, .brief-grid small, .connection-row small, .two-col small, .section-head small, .theory-grid small, .source-heading small, .brief-label, .track-title small, .answer-levels small, .drill-top span, .drill-top small, .independent-head small, .transfer-badge, .tomorrow-card small, .integration-card small { font-size: 12px; }
+  .brief-grid h3 { font-size: 18px; }
+  .brief-grid p { font-size: 14px; }
+  .brief-route > span { font-size: 11px; }
+  .brief-route b { font-size: 9px; }
   .connection-row strong { font-size: 17px; }
   .connection-row p { font-size: 13px; line-height: 1.6; }
   .two-col p, .section-head p, .theory-grid p, .theory-main p { font-size: 16px; line-height: 1.75; }
@@ -762,7 +798,8 @@ textarea:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0
   .lesson-day { width: 57px; height: 66px; }
   .lesson-day strong { font-size: 28px; }
   .lesson-time { display: none; }
-  .lesson-tabs { top: 62px; padding: 0 10px; }
+  .day-switcher { top: 62px; padding: 8px 18px; }
+  .lesson-tabs { top: 121px; padding: 0 10px; }
   .lesson-tabs button { min-width: 105px; }
   .lesson-body { padding: 32px 20px 85px; }
   .portfolio-hero { grid-template-columns: 110px 1fr; }
@@ -845,3 +882,11 @@ textarea:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0
   .page, .lesson-body { max-width: none; padding: 20px; }
   body { background: white; }
 }
+  .day-switcher button { flex-basis: 76px; }
+  .day-switcher button span { display: none; }
+  .daily-brief > header { padding: 24px; }
+  .brief-time { display: none; }
+  .brief-grid { grid-template-columns: 1fr; }
+  .brief-grid article:nth-child(odd) { border-right: 0; }
+  .brief-route { overflow-x: auto; }
+  .brief-route > span { flex: 0 0 130px; }

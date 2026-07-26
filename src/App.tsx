@@ -164,8 +164,8 @@ export default function Home() {
     <div className="app-shell">
       <header className="topbar">
         <button className="brand" onClick={() => setView("home")} aria-label="ホームへ">
-          <span className="brand-mark">C</span>
-          <span><strong>Commercial</strong><em>DIAGNOSIS ENGINE</em></span>
+          <span className="brand-mark">E</span>
+          <span><strong>Decision Intelligence Academy</strong><em>COMMERCIAL PSYCHOLOGY · SPECIALIZATION 01</em></span>
         </button>
         <div className="top-progress">
           <span>30-DAY OJT</span>
@@ -203,6 +203,7 @@ export default function Home() {
         {view === "day" && currentDay && (
           <Lesson
             day={currentDay}
+            selectDay={openDay}
             tab={tab}
             setTab={setTab}
             state={state}
@@ -229,7 +230,7 @@ function Dashboard({ progress, nextOpen, state, openDay, setView }: { progress: 
     <div className="page dashboard">
       <section className="hello-hero">
         <div className="hello-copy">
-          <div className="eyebrow"><span>30 DAYS · PERSONAL MBA × VIRTUAL OJT</span></div>
+          <div className="eyebrow"><span>ENTERPRISE DECISION INTELLIGENCE ACADEMY · SPECIALIZATION 01</span></div>
           <h1>30日後、曖昧な商業問題を<br /><span>「売れる次の一手」</span>に変える。</h1>
           <p>実在企業の数値・失敗・意思決定を教材に、顧客診断から商品、価格、集客、営業、実験、有料提案までを一つのEngineとして運転します。</p>
           <div className="hero-capabilities">
@@ -377,14 +378,28 @@ function Engine() {
   );
 }
 
-function Lesson({ day, tab, setTab, state, setAnswer, toggleCheck, score, completeDay }: {
-  day: Day; tab: string; setTab: (s: string) => void; state: CourseState;
+function Lesson({ day, selectDay, tab, setTab, state, setAnswer, toggleCheck, score, completeDay }: {
+  day: Day; selectDay: (n: number) => void; tab: string; setTab: (s: string) => void; state: CourseState;
   setAnswer: (k: string, v: string) => void; toggleCheck: (k: string) => void;
   score: number; completeDay: () => void;
 }) {
   const color = stageColor(day);
   return (
     <div className="lesson" style={{ "--accent": color } as React.CSSProperties}>
+      <nav className="day-switcher" aria-label="学習日を選択">
+        {days.map(item => (
+          <button
+            key={item.day}
+            className={`${item.day === day.day ? "active" : ""} ${state.completed.includes(item.day) ? "done" : ""}`}
+            onClick={() => {
+              selectDay(item.day);
+            }}
+            aria-label={`Day ${item.day} ${item.title}`}
+          >
+            <small>{item.day}</small><span>{item.title}</span>
+          </button>
+        ))}
+      </nav>
       <section className="lesson-hero">
         <div className="lesson-day"><small>DAY</small><strong>{String(day.day).padStart(2, "0")}</strong></div>
         <div><div className="micro-label">STAGE {day.stage} · {stages[day.stage - 1].name}</div><h1>{day.title}</h1><p>{day.capability}</p></div>
@@ -408,8 +423,26 @@ function Lesson({ day, tab, setTab, state, setAnswer, toggleCheck, score, comple
 
 function Orientation({ day, setTab }: { day: Day; setTab: (s: string) => void }) {
   const prev = day.day > 1 ? days[day.day - 2] : null;
+  const totalMinutes = day.sources.reduce((n, source) => n + source.minutes, 0);
   return <div className="content-flow">
-    <section className="today-question"><small>TODAY’S COMMERCIAL PROBLEM</small><h2>{day.question}</h2></section>
+    <section className="daily-brief">
+      <header>
+        <div><small>TODAY’S PARTNER BRIEF</small><h2>{day.question}</h2></div>
+        <span className="brief-time"><Icon name="clock" size={17} /> 2–3 HOURS</span>
+      </header>
+      <div className="brief-grid">
+        <article><small>01 · WHY NOW</small><h3>なぜ今日学ぶか</h3><p>{day.why}</p></article>
+        <article><small>02 · DECISION SKILL</small><h3>今日できるようになること</h3><p>{day.capability}</p></article>
+        <article><small>03 · WORKED CASE</small><h3>{day.case.name}</h3><p>{day.case.scene}</p></article>
+        <article><small>04 · DELIVERABLE</small><h3>{day.output}</h3><p>完成例を読み、3つの小判断、別業界、自分の案件の順で作ります。</p></article>
+      </div>
+      <div className="brief-route">
+        <span><b>INPUT</b>{day.sources.length}資料 · {totalMinutes}分</span><Icon name="arrow" size={16} />
+        <span><b>MODEL</b>プロの判断順序</span><Icon name="arrow" size={16} />
+        <span><b>PRACTICE</b>3判断＋別業界</span><Icon name="arrow" size={16} />
+        <span><b>OUTPUT</b>{day.output}</span>
+      </div>
+    </section>
     <div className="connection-row">
       <div><small>YESTERDAY</small><strong>{prev ? prev.title : "ここから開始"}</strong><p>{prev ? prev.output : "診断する問題の境界を作る"}</p></div>
       <Icon name="arrow" />
@@ -417,10 +450,6 @@ function Orientation({ day, setTab }: { day: Day; setTab: (s: string) => void })
       <Icon name="arrow" />
       <div><small>TOMORROW</small><strong>{day.day < 30 ? days[day.day].title : "90日実務へ"}</strong><p>{day.next}</p></div>
     </div>
-    <section className="white-card two-col">
-      <div><span className="section-index">A</span><small>ENGINE PART</small><h3>今日つくる部品</h3><p>{day.capability}</p><div className="asset-pill"><Icon name="portfolio" size={17} /> {day.output}</div></div>
-      <div><span className="section-index">C</span><small>WHY IT MATTERS</small><h3>これがない専門家の損失</h3><p>{day.why}</p></div>
-    </section>
     <NextButton label="理論を日本語で理解する" onClick={() => setTab("learn")} />
   </div>;
 }
@@ -436,12 +465,15 @@ function Learn({ day, setTab }: { day: Day; setTab: (s: string) => void }) {
     </section>
     <section className="source-section">
       <div className="source-heading"><div><small>PRIMARY MATERIALS</small><h3>今日見る範囲だけ</h3></div><span>合計 {day.sources.reduce((n, s) => n + s.minutes, 0)} min</span></div>
-      {day.sources.map((source, i) => <a className="source-card" key={`${source.url}-${i}`} href={source.url} target="_blank" rel="noreferrer">
-        <span className="source-index">0{i + 1}</span>
-        <div><small>{source.provider}</small><h4>{source.title}</h4><p><b>見る範囲：</b>{source.range}</p><p><b>視聴中の問い：</b>{source.purpose}ために、原著者が「言えること／言っていないこと」を一つずつ拾う。</p></div>
+      {day.sources.map((source, i) => {
+        const kind = source.kind || (source.provider.includes("Coursera") ? "COURSE" : "READING");
+        const action = kind === "VIDEO" ? "視聴" : kind === "COURSE" ? "受講" : "読解";
+        return <a className="source-card" key={`${source.url}-${i}`} href={source.url} target="_blank" rel="noreferrer">
+        <span className="source-index">{kind}</span>
+        <div><small>{source.provider}</small><h4>{source.title}</h4><p><b>{action}範囲：</b>{source.range}</p><p><b>{action}中の問い：</b>{source.purpose}ために、原著者が「言えること／言っていないこと」を一つずつ拾う。</p></div>
         <div className="source-time"><Icon name="clock" size={15} /> {source.minutes} min <Icon name="external" size={16} /></div>
-      </a>)}
-      <div className="source-goal"><Icon name="check" /><p><b>視聴後の到達条件</b>：{day.theory.name}を、定義・使う工程・限界・誤用の4文で説明できる。</p></div>
+      </a>})}
+      <div className="source-goal"><Icon name="check" /><p><b>教材後の到達条件</b>：{day.theory.name}を、定義・使う工程・限界・誤用の4文で説明できる。</p></div>
     </section>
     <NextButton label="プロの完成思考を見る" onClick={() => setTab("case")} />
   </div>;
