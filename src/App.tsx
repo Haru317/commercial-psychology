@@ -457,6 +457,7 @@ function Orientation({ day, setTab }: { day: Day; setTab: (s: string) => void })
 function Learn({ day, setTab }: { day: Day; setTab: (s: string) => void }) {
   return <div className="content-flow">
     <SectionHead index="D" eyebrow="WORKING THEORY" title={day.theory.name} text="理論名を暗記する必要はありません。今日の判断の、どこで使い、どこで止めるかを理解します。" />
+    {day.day === 1 && <DayOneTheory />}
     <section className="theory-grid">
       <div className="theory-main"><small>PLAIN JAPANESE</small><h3>ひとことで言うと</h3><p>{day.theory.plain}</p></div>
       <div><small>説明できる</small><p>{day.theory.can}</p></div>
@@ -479,6 +480,39 @@ function Learn({ day, setTab }: { day: Day; setTab: (s: string) => void }) {
   </div>;
 }
 
+function DayOneTheory() {
+  const gates = [
+    ["1", "Decision / 意思決定", "分析結果を使う人は誰か。いつ、どの選択肢から一つを選ぶのか。決定がなければ調査は知識収集で終わる。"],
+    ["2", "Value at Stake / 守る価値", "売上、利益、キャッシュ、戦略顧客、能力、信頼の何が、いくら・どの速度で失われるのか。"],
+    ["3", "Validity / 問題妥当性", "症状は目標戦略に照らして本当に悪いか。別の価値源の成長や、解く機会費用を含めても優先すべきか。"],
+    ["4", "Boundary / 診断境界", "市場・顧客・商品・地域・期間・ファネルのどこまでを今回扱い、何を別ワークストリームへ送るか。"],
+    ["5", "Evidence / 識別証拠", "競合する説明の順位を変えるデータは何か。社内のどの部署・役職が、どの名称の資料を持つか。"],
+    ["6", "Action Test / 行動条件", "結果がAなら何をし、Bなら何をしないか。結論に関係なく同じ施策をするなら、その分析は不要。"],
+  ];
+  return <>
+    <section className="mentor-lecture">
+      <div className="mentor-kicker">10-MINUTE PARTNER LECTURE · 先に理解</div>
+      <h2>問題は「数字が下がったこと」ではない。<br />経営判断を誤らせる、不確実性の塊である。</h2>
+      <div className="lecture-columns">
+        <p>クライアントは通常、症状・原因・処方を一文に混ぜて持ってきます。「若者が減った。ブランドが古い。SNSを強化したい」「売上が落ちた。需要がない。広告を増やしたい」。コンサルタントの最初の仕事は、文章を測定可能に短くすることではありません。<b>その会社が今、本当に何を決めなければならないかへ戻すこと</b>です。</p>
+        <p>若年客が減っても、戦略が高単価成熟層へ移行中なら成功の副作用かもしれません。売上が減っても、低粗利製品から高LTV継続収益へ移行中なら、集計売上だけでは悪化を判定できません。ゆえに「問題を固定する」前に、<b>問題として扱う資格があるか</b>を審査します。</p>
+      </div>
+      <div className="partner-rule"><span>PARTNER RULE</span><strong>症状 → 測定</strong>へ急がず、<strong>意思決定 → 価値毀損 → 妥当性 → 境界 → 証拠 → 行動条件</strong>の順で診断契約を作る。</div>
+    </section>
+    <section className="gate-framework">
+      <div className="framework-title"><small>PROBLEM VALIDITY GATE</small><h3>この6問を通過しない問題には、分析工数を使わない</h3></div>
+      <div className="gate-grid">{gates.map(([n, title, body]) => <article key={n}><span>{n}</span><div><h4>{title}</h4><p>{body}</p></div></article>)}</div>
+    </section>
+    <section className="contrast-table">
+      <div className="framework-title"><small>QUALITY BAR</small><h3>同じ依頼が、どこまで経営課題になっているか</h3></div>
+      <div className="comparison-row head"><span>水準</span><span>書き方</span><span>欠けているもの</span></div>
+      <div className="comparison-row"><b>受付メモ</b><p>最近、若い人に選ばれない。</p><p>事実・戦略との関係がない。</p></div>
+      <div className="comparison-row"><b>分析課題</b><p>20代の新規予約率が前年同期比で何％低下したか。</p><p>測れるが、低下を解く価値と意思決定がない。</p></div>
+      <div className="comparison-row pro"><b>Decision Mandate</b><p>院長が次四半期の広告費と施術枠を20代再獲得／50–60代高単価治療のどちらへ配分するか決めるため、年齢×施術別の限界利益・LTV・稼働を比較する。</p><p>結果が資源配分を変え、問題の妥当性も検査できる。</p></div>
+    </section>
+  </>;
+}
+
 function Case({ day, setTab }: { day: Day; setTab: (s: string) => void }) {
   return <div className="content-flow">
     <SectionHead index="E" eyebrow="WORKED EXAMPLE" title={day.case.name} text={day.case.role} />
@@ -491,6 +525,7 @@ function Case({ day, setTab }: { day: Day; setTab: (s: string) => void }) {
       <div className="track-title"><small>PROFESSIONAL REASONING</small><h3>結論ではなく、判断の順序を追う</h3></div>
       {day.case.reasoning.map((step, i) => <div className="reason-step" key={step}><span>{String(i + 1).padStart(2, "0")}</span><p>{step}</p></div>)}
     </section>
+    {day.day === 1 && <DayOneWorkpapers />}
     <section>
       <SectionHead index="F" eyebrow="DISSECTION" title="三段階の答えを比較する" text="それらしく聞こえる答えほど、反証と測定がないと危険です。" />
       <div className="answer-levels">
@@ -501,6 +536,28 @@ function Case({ day, setTab }: { day: Day; setTab: (s: string) => void }) {
     </section>
     <NextButton label="一判断ずつ真似する" onClick={() => setTab("practice")} />
   </div>;
+}
+
+function DayOneWorkpapers() {
+  return <section className="workpapers">
+    <div className="framework-title"><small>ENGAGEMENT WORKPAPERS · 実務資料</small><h3>公開10-Kから、社内追加資料の依頼までつなぐ</h3><p>10-Kは症状の分解と仮説設定には使えますが、広告・価格・転換・在庫のどれが原因かまでは証明しません。次に社内データを取りに行きます。</p></div>
+    <div className="workpaper-table">
+      <div className="workpaper-head"><span>現物資料／保有者</span><span>見る場所・数字</span><span>比較・判断</span></div>
+      <div><b>FY2022 Form 10-K<br /><small>IR / Finance</small></b><p>Consolidated Statements、Segment information、Key Operational Metrics、Inventory</p><p>FY2021 vs FY2022を製品／Subscriptionで分解。会員数と在庫の方向が全社売上と一致するか。</p></div>
+      <div><b>Weekly funnel report<br /><small>Growth / E-commerce</small></b><p>Impression、visit、PDP、cart、checkout、purchaseをchannel・device・geo別</p><p>前年同週・価格改定前後・同一チャネルで比較し、需要低下が流入か転換かを識別。</p></div>
+      <div><b>Media spend & CAC bridge<br /><small>Growth Finance</small></b><p>Spend、new customers、blended／incremental CAC、payback、promotion</p><p>広告量不足か効率悪化かを分離。追加1ドルの限界獲得価値が正か。</p></div>
+      <div><b>SKU inventory aging<br /><small>Supply Chain / FP&amp;A</small></b><p>SKU別units、days on hand、forecast accuracy、markdown、cancellation、return</p><p>在庫増が需要予測、SKU mix、供給リードタイム、返品のどこで発生したか。</p></div>
+      <div><b>Subscriber cohort file<br /><small>Product Analytics</small></b><p>加入月別activation、usage、churn、ARPU、service cost</p><p>会員増がLTV・Contribution Marginへ変換されているか。獲得縮小後も継続価値を守れるか。</p></div>
+    </div>
+    <div className="final-mandate">
+      <small>PARTNER-READY OUTPUT · 完成形</small>
+      <h3>Diagnostic Mandate v1</h3>
+      <p><b>Decision：</b>CEO／CFOが30日後、次四半期の成長資金を新規獲得・会員価値・在庫圧縮へどう再配分するか決める。</p>
+      <p><b>Issue：</b>FY2022の製品売上▲9.62億ドルと在庫＋6.95億ドルがキャッシュを毀損する一方、Subscription売上＋5.22億ドル・会員＋27%は保護すべき価値源。需要全体の消滅とは定義しない。</p>
+      <p><b>Scope：</b>米国Connected Fitnessの新規獲得ファネル、価格・プロモーション、CAC、SKU在庫をFY2021–22週次で分析。既存会員解約原因・海外市場・ブランド刷新は除外。</p>
+      <p><b>Decision rule：</b>限界CACが会員Contribution LTV内で、流入不足が主要因なら広告を選択。転換悪化なら価格／商品／配送を修正。在庫ミスマッチが主因なら広告ではなくSKU・調達・処分へ資金を移す。</p>
+    </div>
+  </section>;
 }
 
 function Practice({ day, state, setAnswer, setTab }: { day: Day; state: CourseState; setAnswer: (k: string, v: string) => void; setTab: (s: string) => void }) {

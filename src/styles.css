@@ -664,6 +664,48 @@ textarea:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0
 .transfer-model p { margin: 8px 0; color: var(--muted); display: grid; grid-template-columns: 25px 1fr; gap: 8px; font-size: 13px; line-height: 1.6; }
 .transfer-model p b { width: 23px; height: 23px; border-radius: 50%; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; font-size: 10px; }
 
+.mentor-lecture { overflow: hidden; padding: 34px; border: 1px solid #ded5cf; border-radius: 4px; background: linear-gradient(135deg,#fffdf9,#fff 62%); box-shadow: 0 16px 45px rgba(37,43,61,.07); }
+.mentor-kicker, .framework-title small, .final-mandate > small { color: #9a7158; font-size: 11px; font-weight: 850; letter-spacing: .16em; }
+.mentor-lecture h2 { max-width: 850px; margin: 9px 0 24px; color: var(--navy); font-family: Georgia,"Yu Mincho",serif; font-size: 30px; line-height: 1.42; font-weight: 500; }
+.lecture-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.lecture-columns p { margin: 0; color: #4f5769; font-size: 15px; line-height: 1.9; }
+.lecture-columns b { color: var(--navy); }
+.partner-rule { margin-top: 25px; padding: 17px 20px; border-left: 4px solid #b58a6c; background: #f7f2ed; color: #515868; font-size: 14px; line-height: 1.75; }
+.partner-rule span { margin-right: 13px; color: #9a7158; font-size: 10px; font-weight: 900; letter-spacing: .12em; }
+.partner-rule strong { color: var(--navy); }
+.gate-framework, .contrast-table, .workpapers { padding: 30px; border: 1px solid var(--line); border-radius: 5px; background: #fff; }
+.framework-title h3 { margin: 6px 0 0; color: var(--navy); font-family: Georgia,"Yu Mincho",serif; font-size: 24px; font-weight: 500; }
+.framework-title > p { margin: 9px 0 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.gate-grid { margin-top: 21px; display: grid; grid-template-columns: repeat(2,1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.gate-grid article { min-height: 130px; padding: 18px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
+.gate-grid article > span { width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-family: Georgia,serif; font-size: 13px; }
+.gate-grid h4 { margin: 2px 0 6px; color: var(--navy); font-size: 14px; }
+.gate-grid p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.comparison-row { display: grid; grid-template-columns: 130px 1.35fr 1fr; border: 1px solid var(--line); border-top: 0; }
+.comparison-row.head { margin-top: 20px; border-top: 1px solid var(--line); background: var(--navy); color: #fff; font-size: 10px; font-weight: 850; letter-spacing: .1em; }
+.comparison-row > * { margin: 0; padding: 14px; border-right: 1px solid var(--line); font-size: 13px; line-height: 1.6; }
+.comparison-row > *:last-child { border-right: 0; }
+.comparison-row b { color: var(--navy); }
+.comparison-row p { color: var(--muted); }
+.comparison-row.pro { border-left: 4px solid #b58a6c; background: #fffcf8; }
+.workpapers { padding: 0; overflow: hidden; }
+.workpapers > .framework-title { padding: 28px 30px; }
+.workpaper-table { border-top: 1px solid var(--line); }
+.workpaper-head, .workpaper-table > div { display: grid; grid-template-columns: 220px 1fr 1.15fr; }
+.workpaper-head { background: #f1f3f7; color: #667085; font-size: 10px; font-weight: 850; letter-spacing: .09em; }
+.workpaper-table > div:not(.workpaper-head) { border-top: 1px solid var(--line); }
+.workpaper-table > div:first-child { border-top: 0; }
+.workpaper-table span, .workpaper-table b, .workpaper-table p { margin: 0; padding: 15px 17px; border-right: 1px solid var(--line); font-size: 13px; line-height: 1.6; }
+.workpaper-table > div > *:last-child { border-right: 0; }
+.workpaper-table b { color: var(--navy); }
+.workpaper-table b small { color: #9a7158; font-size: 10px; }
+.workpaper-table p { color: var(--muted); font-weight: 400; }
+.final-mandate { margin: 24px; padding: 27px; background: var(--navy); color: #fff; }
+.final-mandate > small { color: var(--yellow); }
+.final-mandate h3 { margin: 5px 0 15px; font-family: Georgia,"Yu Mincho",serif; font-size: 25px; font-weight: 500; }
+.final-mandate p { margin: 8px 0; color: #d9e1ef; font-size: 14px; line-height: 1.7; }
+.final-mandate p b { color: #fff; }
+
 @media (min-width: 861px) {
   body { font-size: 16px; }
   .brand strong { font-size: 20px; }
@@ -781,6 +823,9 @@ textarea:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0
   .blueprint-heading { grid-template-columns: 1fr; gap: 10px; }
   .agenda-grid { grid-template-columns: repeat(2, 1fr); }
   .practice-pair, .independent-pair, .transfer-pair, .practice-case-anchor { grid-template-columns: 1fr; }
+  .lecture-columns, .gate-grid { grid-template-columns: 1fr; }
+  .comparison-row, .workpaper-head, .workpaper-table > div { grid-template-columns: 150px 1fr; }
+  .comparison-row > *:last-child, .workpaper-table > div > *:last-child { grid-column: 1/-1; border-top: 1px solid var(--line); }
   .practice-pair textarea { min-height: 180px; }
   .learning-loop { grid-template-columns: 1fr; }
   .learning-loop > small { grid-column: 1; }
@@ -817,6 +862,13 @@ textarea:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0
   .progress-orbit { right: 24px; bottom: -21px; width: 120px; height: 120px; }
   .shape-b { display: none; }
   .hero-capabilities { display: grid; grid-template-columns: 1fr; }
+  .mentor-lecture, .gate-framework, .contrast-table { padding: 22px 18px; }
+  .mentor-lecture h2 { font-size: 24px; }
+  .comparison-row, .workpaper-head, .workpaper-table > div { grid-template-columns: 1fr; }
+  .comparison-row > *, .workpaper-table span, .workpaper-table b, .workpaper-table p { border-right: 0; border-top: 1px solid var(--line); }
+  .comparison-row.head span:first-child, .workpaper-head span:first-child { border-top: 0; }
+  .workpapers > .framework-title { padding: 23px 19px; }
+  .final-mandate { margin: 14px; padding: 21px; }
   .course-blueprint { padding: 23px 19px; }
   .blueprint-heading h2 { font-size: 25px; }
   .blueprint-diagram { grid-template-columns: 1fr; }
