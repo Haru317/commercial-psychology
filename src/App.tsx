@@ -200,8 +200,8 @@ export default function Home() {
     <div className="app-shell">
       <header className="topbar">
         <button className="brand" onClick={() => setView("home")} aria-label="ホームへ">
-          <span className="brand-mark">E</span>
-          <span><strong>Decision Intelligence Academy</strong><em>COMMERCIAL PSYCHOLOGY · SPECIALIZATION 01</em></span>
+          <span className="brand-mark">C</span>
+          <span><strong>Commercial Psychology</strong><em>DECISION INTELLIGENCE ACADEMY</em></span>
         </button>
         <div className="top-progress">
           <span>30-DAY OJT</span>
@@ -266,20 +266,22 @@ function Dashboard({ progress, nextOpen, state, openDay, setView }: { progress: 
     <div className="page dashboard">
       <section className="hello-hero">
         <div className="hello-copy">
-          <div className="eyebrow"><span>ENTERPRISE DECISION INTELLIGENCE ACADEMY · SPECIALIZATION 01</span></div>
-          <h1>30日後、曖昧な商業問題を<br /><span>「売れる次の一手」</span>に変える。</h1>
-          <p>実在企業の数値・失敗・意思決定を教材に、顧客診断から商品、価格、集客、営業、実験、有料提案までを一つのEngineとして運転します。</p>
-          <div className="hero-capabilities">
-            <span><b>DIAGNOSE</b>原因を証拠で絞る</span>
-            <span><b>DESIGN</b>価値・商品・価格を組む</span>
-            <span><b>SELL &amp; PROVE</b>提案し、結果で更新する</span>
+          <div className="eyebrow"><span>経営者・事業責任者・戦略コンサルタントを目指す人のための実務訓練</span></div>
+          <h1>顧客が動かない理由を診断し、<br /><span>売上を動かす施策</span>まで設計する。</h1>
+          <p className="hero-lead">「売れない」「価格が高い」「若者に選ばれない」。根拠のない依頼をそのまま施策にせず、証拠・顧客心理・事業構造から真因を特定し、経営会議で実行できる提案へ変える30日間の案件型学習プラットフォームです。</p>
+          <div className="value-path" aria-label="サービスが提供する価値">
+            <div><small>PROBLEM</small><strong>経験と勘による誤診</strong></div>
+            <i aria-hidden="true">→</i>
+            <div><small>METHOD</small><strong>実在企業の案件OJT</strong></div>
+            <i aria-hidden="true">→</i>
+            <div><small>OUTCOME</small><strong>施策・KPI・有料提案</strong></div>
           </div>
           <div className="hero-actions">
-            <AppButton onClick={() => openDay(nextOpen)}>Day {nextOpen} を始める <Icon name="arrow" size={17} /></AppButton>
-            <AppButton variant="ghost" onClick={() => document.getElementById("course-blueprint")?.scrollIntoView({ behavior: "smooth" })}>全体像を見る</AppButton>
+            <AppButton onClick={() => openDay(nextOpen)}>案件訓練を始める <Icon name="arrow" size={17} /></AppButton>
+            <AppButton variant="ghost" onClick={() => document.getElementById("course-blueprint")?.scrollIntoView({ behavior: "smooth" })}>30日後にできること</AppButton>
           </div>
         </div>
-        <div className="progress-orbit" style={{ "--progress": `${progress * 3.6}deg` } as React.CSSProperties}>
+        <div className="progress-orbit" aria-label={`学習進捗 ${progress}%`} style={{ "--progress": `${progress * 3.6}deg` } as React.CSSProperties}>
           <div><small>COMPLETE</small><b>{progress}<em>%</em></b><span>{state.completed.length} of 30 days</span></div>
           <i className="orbit-dot" />
         </div>
