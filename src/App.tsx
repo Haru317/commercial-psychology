@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { days, engineSteps, stages, type Day } from "./curriculum";
 
 type View = "home" | "journey" | "engine" | "portfolio" | "day";
@@ -19,6 +19,36 @@ const initialState: CourseState = {
   checks: {},
   lastDay: 1,
 };
+
+function assessDayOne(state: CourseState) {
+  const fields = ["mandate", "evidence", "hypotheses", "request", "intervention", "decision"];
+  const answers = Object.fromEntries(fields.map(field => [field, (state.answers[`d1-room-${field}`] || "").trim()]));
+  const includesAny = (value: string, terms: string[]) => terms.some(term => value.toLowerCase().includes(term.toLowerCase()));
+  const criteria = [
+    answers.mandate.length >= 100 && includesAny(answers.mandate, ["CEO", "CFO", "決め", "配分"]),
+    includesAny(answers.evidence, ["9.62", "962", "5.22", "522"]) && includesAny(answers.evidence, ["在庫", "695", "6.95"]),
+    answers.hypotheses.length >= 140 && includesAny(answers.hypotheses, ["棄却", "反証", "なら"]),
+    answers.request.length >= 120 && includesAny(answers.request, ["Finance", "Growth", "Supply", "Analytics", "FP&A"]) && includesAny(answers.request, ["週次", "cohort", "SKU", "チャネル"]),
+    answers.intervention.length >= 150 && includesAny(answers.intervention, ["KPI", "CAC", "LTV", "転換", "在庫"]) && includesAny(answers.intervention, ["対照", "比較", "ベースライン"]),
+    answers.decision.length >= 120 && includesAny(answers.decision, ["継続", "中止", "Pivot", "ピボット"]) && includesAny(answers.decision, ["週", "%", "ドル", "$"]),
+  ];
+  return { criteria, score: criteria.filter(Boolean).length * 15 + (criteria.every(Boolean) ? 10 : 0) };
+}
+
+function assessDayTwo(state: CourseState) {
+  const fields = ["inherit", "classify", "status", "scope", "request", "memo"];
+  const answers = Object.fromEntries(fields.map(field => [field, (state.answers[`d2-room-${field}`] || "").trim()]));
+  const includesAny = (value: string, terms: string[]) => terms.some(term => value.toLowerCase().includes(term.toLowerCase()));
+  const criteria = [
+    answers.inherit.length >= 90 && includesAny(answers.inherit, ["判断", "Decision", "投資", "配分"]),
+    answers.classify.length >= 160 && includesAny(answers.classify, ["観測", "引用", "計算", "解釈", "仮説", "予測"]),
+    answers.status.length >= 140 && includesAny(answers.status, ["confirmed", "確認済"]) && includesAny(answers.status, ["unverified", "未確認", "contradicted", "矛盾"]),
+    answers.scope.length >= 120 && includesAny(answers.scope, ["VMware", "一社", "一般化", "適用範囲"]),
+    answers.request.length >= 150 && includesAny(answers.request, ["Finance", "Sales", "Product", "RevOps", "Analytics"]) && includesAny(answers.request, ["cohort", "コホート", "列", "週次", "月次"]),
+    answers.memo.length >= 180 && includesAny(answers.memo, ["分かる", "確認", "未確認"]) && includesAny(answers.memo, ["次", "Day 3", "出所", "評価"]),
+  ];
+  return { criteria, score: criteria.filter(Boolean).length * 15 + (criteria.every(Boolean) ? 10 : 0) };
+}
 
 const tabs = [
   { id: "orientation", label: "01 今日の任務" },
@@ -105,6 +135,12 @@ export default function Home() {
   }
 
   function dayScore(day: Day) {
+    if (day.day === 1) {
+      return assessDayOne(state).score;
+    }
+    if (day.day === 2) {
+      return assessDayTwo(state).score;
+    }
     const guided = day.drills.filter((_, i) => (state.answers[`d${day.day}-q${i}`] || "").trim()).length;
     const guidedPoints = Math.round((guided / day.drills.length) * 40);
     const independent = (state.answers[`d${day.day}-ind`] || "").trim() ? 20 : 0;
@@ -384,8 +420,25 @@ function Lesson({ day, selectDay, tab, setTab, state, setAnswer, toggleCheck, sc
   score: number; completeDay: () => void;
 }) {
   const color = stageColor(day);
+  const lessonTopRef = useRef<HTMLDivElement>(null);
+  const lessonBodyRef = useRef<HTMLDivElement>(null);
+  const previousDayRef = useRef(day.day);
+  const mountedRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+
+    const dayChanged = previousDayRef.current !== day.day;
+    previousDayRef.current = day.day;
+    const target = dayChanged ? lessonTopRef.current : lessonBodyRef.current;
+    target?.scrollIntoView({ block: "start", behavior: "auto" });
+  }, [day.day, tab]);
+
   return (
-    <div className="lesson" style={{ "--accent": color } as React.CSSProperties}>
+    <div ref={lessonTopRef} className="lesson" style={{ "--accent": color } as React.CSSProperties}>
       <nav className="day-switcher" aria-label="学習日を選択">
         {days.map(item => (
           <button
@@ -409,11 +462,15 @@ function Lesson({ day, selectDay, tab, setTab, state, setAnswer, toggleCheck, sc
         {tabs.map(t => <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => { setTab(t.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}>{t.label}</button>)}
       </nav>
 
-      <div className="lesson-body">
+      <div ref={lessonBodyRef} className="lesson-body">
         {tab === "orientation" && <Orientation day={day} setTab={setTab} />}
         {tab === "learn" && <Learn day={day} setTab={setTab} />}
         {tab === "case" && <Case day={day} setTab={setTab} />}
-        {tab === "practice" && <Practice day={day} state={state} setAnswer={setAnswer} setTab={setTab} />}
+        {tab === "practice" && (day.day === 1
+          ? <DayOneCaseRoom state={state} setAnswer={setAnswer} setTab={setTab} />
+          : day.day === 2
+            ? <DayTwoCaseRoom state={state} setAnswer={setAnswer} setTab={setTab} />
+            : <Practice day={day} state={state} setAnswer={setAnswer} setTab={setTab} />)}
         {tab === "apply" && <Apply day={day} state={state} setAnswer={setAnswer} setTab={setTab} />}
         {tab === "pass" && <Pass day={day} state={state} toggleCheck={toggleCheck} score={score} completeDay={completeDay} />}
       </div>
@@ -560,6 +617,195 @@ function DayOneWorkpapers() {
   </section>;
 }
 
+const dayOneRoomSteps = [
+  {
+    key: "mandate",
+    n: "01",
+    label: "PARTNER INTAKE",
+    title: "依頼をDecision Mandateへ変換する",
+    prompt: "誰が・いつ・何を決める案件か、守る経済価値、今回扱わない範囲まで書いてください。",
+    evidence: "CEO／CFO、次四半期の資金配分、製品売上・継続収益・在庫キャッシュ、米国Connected Fitness",
+    model: "CEO／CFOが30日後、次四半期の成長資金を①新規獲得、②会員価値、③在庫圧縮のどこへ配分するか決める。FY2022の製品売上減と在庫増によるキャッシュ毀損を止めつつ、成長したSubscription価値を守る。海外市場とブランド刷新は今回の範囲外とする。",
+  },
+  {
+    key: "evidence",
+    n: "02",
+    label: "DATA ROOM 01",
+    title: "10-Kから矛盾する証拠を抽出する",
+    prompt: "製品、Subscription、会員、在庫の4点をFY2021→FY2022で比較し、「需要が消えた」に対する暫定判断を書いてください。",
+    evidence: "Product revenue $3.15bn→$2.19bn／Subscription $0.87bn→$1.39bn／会員＋27%／Inventory $0.52bn→$1.21bn",
+    model: "製品売上は約9.62億ドル減った一方、Subscription売上は約5.22億ドル増え、Connected Fitness会員も27%増えた。在庫は約6.95億ドル増加した。したがって全需要の消滅は支持されず、機器新規獲得・価格／転換・供給過剰と、既存会員価値を分けて診断する。",
+  },
+  {
+    key: "hypotheses",
+    n: "03",
+    label: "HYPOTHESIS CONTROL",
+    title: "競合仮説と棄却条件を置く",
+    prompt: "最低3仮説を順位づけし、各仮説が正しいなら見える数字／棄却する数字を対で書いてください。",
+    evidence: "H1 流入不足／H2 価格・商品・配送による転換悪化／H3 SKU需要予測・調達過剰。広告増はH1だけに効く。",
+    model: "H1流入不足：同一価格・同一地域のvisitが低下しCVRが安定なら支持、visit安定でCVR低下なら棄却。H2転換悪化：PDP→purchaseが価格改定・配送LT悪化後に低下すれば支持。H3供給過剰：sell-through安定でも発注・入荷が需要を上回りagingが増えれば支持。最初に週次ファネルでH1/H2を識別する。",
+  },
+  {
+    key: "request",
+    n: "04",
+    label: "CLIENT REQUEST",
+    title: "誰へ、どの名称の資料を要求するか",
+    prompt: "部署／役職、正式な資料名、必要列、期間・粒度、比較軸、回答期限を含む依頼文を書いてください。",
+    evidence: "Growth Finance: Media spend & CAC bridge／E-commerce: Weekly funnel report／Supply Chain: SKU inventory aging／Product Analytics: Subscriber cohort file",
+    model: "Growth Finance責任者へMedia Spend & CAC Bridge、E-commerce AnalyticsへWeekly Funnel Reportを依頼。FY2021–22の週次、channel×device×geoでspend, visit, PDP, cart, checkout, purchase, price, promotion, CACを含め、価格改定日を付す。Supply ChainへSKU Inventory Aging、Product Analyticsへ加入月別cohortを5営業日以内に依頼する。",
+  },
+  {
+    key: "intervention",
+    n: "05",
+    label: "INTERVENTION MEMO",
+    title: "仮説ごとの施策と因果測定を設計する",
+    prompt: "有力仮説、介入、対象／比較群、先行KPI、遅行KPI、ガードレール、測定期間を一続きで設計してください。",
+    evidence: "広告増／価格・配送改善／SKU圧縮は原因別に分離。Incremental CAC、CVR、Contribution LTV、在庫日数、キャッシュを測る。",
+    model: "H2が有力なら、同質地域を介入／比較群に分け、配送確約＋価格表示を4週間テストする。先行KPIはcheckout completionとCVR、遅行KPIはincremental CAC、90日Contribution LTV、返品後粗利。値引率と解約率をガードレールにし、広告費は固定して因果を分離する。",
+  },
+  {
+    key: "decision",
+    n: "06",
+    label: "EXECUTIVE DECISION",
+    title: "継続・中止・Pivotの閾値を先に固定する",
+    prompt: "結果別に、どの数字なら継続／中止／Pivotか、次回経営会議の提案文として書いてください。",
+    evidence: "施策前に閾値を固定。効果、経済性、悪影響、不確実性の4点で判断する。",
+    model: "4週後、CVRが比較群比＋10%以上、incremental CACがContribution LTVの30%以内、返品・解約が各＋2pt未満なら継続。CVR差が3%未満なら中止。CVRは改善してもCAC回収が12か月超なら、広告拡大せず高粗利SKU・配送地域へPivotし、2週間再検証する。",
+  },
+];
+
+function DayOneCaseRoom({ state, setAnswer, setTab }: { state: CourseState; setAnswer: (k: string, v: string) => void; setTab: (s: string) => void }) {
+  const completed = dayOneRoomSteps.filter(step => (state.answers[`d1-room-${step.key}`] || "").trim()).length;
+  return <div className="content-flow case-room">
+    <section className="room-command">
+      <div><small>LIVE ENGAGEMENT · CASE 001</small><h2>Peloton FY2022｜需要消滅か、事業構造転換か</h2><p>資料を読むだけで終わらせず、経営判断・追加資料・仮説棄却・施策・測定・再配分まで一巡します。</p></div>
+      <div className="room-status"><b>{completed}<span>/6</span></b><small>WORKPAPERS</small></div>
+    </section>
+    <section className="data-room">
+      <header><div><small>SIMULATED DATA ROOM</small><h3>案件ファイル｜閲覧順と用途</h3></div><span>4 FILES · 1 INTERVIEW</span></header>
+      <div className="file-grid">
+        {[
+          ["01", "FY2022 Form 10-K", "IR / Finance", "pp.49–53", "製品・Subscription・会員・在庫を分解"],
+          ["02", "Weekly Funnel Report", "E-commerce Analytics", "FY21–22 weekly", "流入低下と転換悪化を識別"],
+          ["03", "Media Spend & CAC Bridge", "Growth Finance", "channel × geo", "広告量と限界効率を分離"],
+          ["04", "SKU Inventory Aging", "Supply Chain / FP&A", "SKU × aging", "需要予測・発注・返品を識別"],
+          ["05", "CFO Intake Interview", "CFO", "12 min transcript", "決定期限・資金制約・反論を確定"],
+        ].map(file => <article key={file[0]}><span>{file[0]}</span><div><b>{file[1]}</b><small>{file[2]} · {file[3]}</small><p>{file[4]}</p></div></article>)}
+      </div>
+    </section>
+    <section className="stakeholder-tension">
+      <small>STAKEHOLDER ROOM · 同じ数字でも利害が違う</small>
+      <div><p><b>CEO</b>「ブランド投資を止めれば回復が遅れる」</p><p><b>CFO</b>「在庫とCACの両方へ現金は使えない」</p><p><b>Growth</b>「広告不足が売上減の主因だ」</p><p><b>Supply Chain</b>「発注時点の需要予測は承認済みだった」</p></div>
+    </section>
+    {dayOneRoomSteps.map(step => {
+      const key = `d1-room-${step.key}`;
+      const value = state.answers[key] || "";
+      return <section className="room-step" key={step.key}>
+        <header><span>{step.n}</span><div><small>{step.label}</small><h3>{step.title}</h3></div><em>{value.trim() ? "DRAFTED" : "OPEN"}</em></header>
+        <div className="room-evidence"><b>案件内で使う証拠</b><p>{step.evidence}</p></div>
+        <h4>{step.prompt}</h4>
+        <div className="room-work">
+          <textarea value={value} onChange={e => setAnswer(key, e.target.value)} placeholder="証拠 → 判断 → 反証／比較 → 次の行動条件まで書く…" />
+          <aside><small>PARTNER-LEVEL MODEL</small><p>{step.model}</p></aside>
+        </div>
+      </section>;
+    })}
+    <section className="closed-loop">
+      <small>THE OPERATING LOOP YOU JUST RAN</small>
+      <div>{["Mandate", "Evidence", "Hypotheses", "Request", "Intervention", "Continue / Stop / Pivot"].map((x, i) => <span key={x}><b>{i + 1}</b>{x}</span>)}</div>
+    </section>
+    <NextButton label="自分の案件へ移植する" onClick={() => setTab("apply")} disabled={completed < 6} />
+  </div>;
+}
+
+const dayTwoRoomSteps = [
+  {
+    key: "inherit", n: "01", label: "INPUT FROM DAY 1", title: "証拠収集をDecision Mandateへ接続する",
+    prompt: "このEvidence Logが、誰のどの判断を変えるためのものか。Day 1の出力を使い、一文で固定してください。",
+    evidence: "CFO／Growth Leadershipが、Enterprise成長投資をself-serve、sales-assisted、既存顧客拡張のどこへ配分するか。",
+    model: "CFOとGrowth Leadershipが次四半期のEnterprise成長資金を、①self-serve獲得、②sales-assisted獲得、③既存顧客のseat expansionへどう配分するか判断するため、Zoomの成長要因に関する主張を検証可能な証拠へ分解する。",
+  },
+  {
+    key: "classify", n: "02", label: "EVIDENCE LOG A", title: "主張を6つの意味へ分解する",
+    prompt: "下の案件ファイルから最低6行を選び、観測・引用・計算・解釈・因果仮説・予測のどれかを付けてください。同じ文に二種類を混ぜないでください。",
+    evidence: "FY2019 revenue $330.5m／net income $7.6m／VMware 19,000 users・41m meeting minutes／『frictionless』『viral growth』。",
+    model: "観測：S-1記載のFY2019売上$330.5m。観測：VMware約19,000人が利用。計算：売上高純利益率は約2.3%。引用：会社はfrictionless experienceと表現。解釈：導入摩擦が低い。因果仮説：低摩擦体験が口コミを介して有料導入を増やした。予測：同じ機構なら紹介起点コホートは他流入よりfree→paid転換と継続率が高い。",
+  },
+  {
+    key: "status", n: "03", label: "EVIDENCE LOG B", title: "確認済み・矛盾・未確認を別列で付ける",
+    prompt: "各主張へconfirmed／contradicted／unverifiedを付け、何をもってその状態としたか出所を併記してください。",
+    evidence: "Confirmedは資料が直接示す範囲だけ。Unverifiedは証拠不足。Contradictedは同じ対象・期間・定義の反対証拠がある場合だけ。",
+    model: "Confirmed｜FY2019売上$330.5m｜Zoom S-1 audited financials。Confirmed｜VMwareの利用規模｜S-1 customer example。Unverified｜VMwareが『簡単だから』購入した｜購入理由データなし。Unverified｜viralが全社成長の主因｜流入源別転換・CACなし。Contradictedは現資料ではなし。反対仮説があるだけで矛盾扱いしない。",
+  },
+  {
+    key: "scope", n: "04", label: "GENERALIZATION CONTROL", title: "一社事例が言える範囲を切る",
+    prompt: "VMware事例から言えること／言えないこと／他社へ移すために必要な条件を分けてください。",
+    evidence: "一社の大規模利用はexistence proof。市場での発生率、購入理由、収益性、再現性は別証拠が必要。",
+    model: "言える：大企業一社で19,000人規模・41m分超の利用が実現した。言えない：全Enterprise顧客が同じ理由で購入する、利用量が高収益・高継続を生む、sales-assistedなしで拡張した。移す条件：同規模企業の複数コホートで、導入経路、seat expansion、継続率、support cost、契約単価を比較する。",
+  },
+  {
+    key: "request", n: "05", label: "CLIENT REQUEST", title: "未確認仮説を識別する社内資料を要求する",
+    prompt: "保有部署／役職、正式な資料名、必要列、期間・粒度、比較軸、期限を含む依頼文を書いてください。",
+    evidence: "RevOps: Acquisition & Conversion Cohort／Product Analytics: Activation & Referral Events／Finance: CAC & Gross Margin Bridge／Sales Ops: Enterprise Expansion Report。",
+    model: "RevOps責任者へAcquisition & Conversion Cohortを5営業日以内に依頼。FY2018–19の月次cohort×source×self-serve/sales-assistedでsignup、hosted meeting、invite、free→paid、days-to-paid、seat count、ARR、90/180日継続を含める。FinanceへCAC & Gross Margin Bridge、Sales OpsへEnterprise Expansion Reportを同一customer IDで結合可能な形式で求め、紹介起点と非紹介起点を比較する。",
+  },
+  {
+    key: "memo", n: "06", label: "PARTNER SYNTHESIS", title: "分かること・未確認・次の一手を返す",
+    prompt: "CFO向けに、現時点で分かること、まだ言えないこと、次に取る証拠、Day 3で評価する論点を200〜300字でまとめてください。",
+    evidence: "Day 2の出口は原因断定ではない。経営判断に必要な未確認主張と、次の証拠取得順を明確にする。",
+    model: "FY2019の売上$330.5m・純利益$7.6mと、VMwareでの大規模利用は確認できる。一方、低摩擦体験やviralが有料成長の主因であること、同様の拡張が顧客全体で再現することは未確認である。まず流入源別cohort、free→paid、seat expansion、CAC、180日継続を結合し、紹介起点とsales-assistedを比較する。Day 3ではS-1、会社事例、社内ログそれぞれの母集団・測定方法・作成者の利害を評価し、投資判断に使う重みを決める。",
+  },
+];
+
+function DayTwoCaseRoom({ state, setAnswer, setTab }: { state: CourseState; setAnswer: (k: string, v: string) => void; setTab: (s: string) => void }) {
+  const completed = dayTwoRoomSteps.filter(step => (state.answers[`d2-room-${step.key}`] || "").trim()).length;
+  const inherited = state.answers["d1-room-mandate"] || "Day 1未入力の場合は、上記のZoom用Decision Mandateを仮入力として使用する。";
+  return <div className="content-flow case-room">
+    <section className="room-command">
+      <div><small>LIVE ENGAGEMENT · CASE 002</small><h2>Zoom FY2019｜成長事実か、成長物語か</h2><p>Day 1の診断指示書を入口に、公開資料・顧客事例・経営者の説明を、原因断定前のEvidence Logへ変換します。</p></div>
+      <div className="room-status"><b>{completed}<span>/6</span></b><small>WORKPAPERS</small></div>
+    </section>
+    <section className="stakeholder-tension">
+      <small>INHERITED DECISION MANDATE · 前日の成果物を使う</small>
+      <div><p><b>Decision</b>{inherited}</p></div>
+    </section>
+    <section className="data-room">
+      <header><div><small>SIMULATED DATA ROOM</small><h3>案件ファイル｜何が書いてあり、何は書いていないか</h3></div><span>5 FILES · 3 CLAIM TYPES</span></header>
+      <div className="file-grid">
+        {[
+          ["01", "FY2019 Form S-1", "IR / Finance", "audited statements", "売上・利益は確認可能。成長原因は直接証明しない"],
+          ["02", "VMware Customer Example", "Company-authored", "19k users / 41m min", "一社の利用規模。市場全体へ一般化不可"],
+          ["03", "CEO Growth Narrative", "Management interview", "frictionless / viral", "経営者の解釈と因果仮説"],
+          ["04", "Acquisition Cohort", "RevOps · REQUEST", "source × cohort", "流入→有料化→継続を識別"],
+          ["05", "Enterprise Expansion", "Sales Ops · REQUEST", "account × month", "seat拡張と営業介入を識別"],
+        ].map(file => <article key={file[0]}><span>{file[0]}</span><div><b>{file[1]}</b><small>{file[2]} · {file[3]}</small><p>{file[4]}</p></div></article>)}
+      </div>
+    </section>
+    <section className="stakeholder-tension">
+      <small>CASE TENSION · 4人の発言を事実欄へ入れない</small>
+      <div><p><b>CEO</b>「viral growthが勝因だ」</p><p><b>Sales</b>「大企業は営業が取った」</p><p><b>Product</b>「使いやすさが拡張を生んだ」</p><p><b>CFO</b>「どこへ追加投資すべきか数字で示してほしい」</p></div>
+    </section>
+    {dayTwoRoomSteps.map(step => {
+      const key = `d2-room-${step.key}`;
+      const value = state.answers[key] || "";
+      return <section className="room-step" key={step.key}>
+        <header><span>{step.n}</span><div><small>{step.label}</small><h3>{step.title}</h3></div><em>{value.trim() ? "DRAFTED" : "OPEN"}</em></header>
+        <div className="room-evidence"><b>この判断に使う材料</b><p>{step.evidence}</p></div>
+        <h4>{step.prompt}</h4>
+        <div className="room-work">
+          <textarea value={value} onChange={e => setAnswer(key, e.target.value)} placeholder="意味分類 → 証拠状態 → 出所 → 適用範囲 → 次証拠の順で書く…" />
+          <aside><small>PARTNER-LEVEL MODEL</small><p>{step.model}</p></aside>
+        </div>
+      </section>;
+    })}
+    <section className="closed-loop">
+      <small>DAY 2 OPERATING LOOP</small>
+      <div>{["Mandate", "Meaning", "Status", "Scope", "Next evidence", "Synthesis"].map((x, i) => <span key={x}><b>{i + 1}</b>{x}</span>)}</div>
+    </section>
+    <NextButton label="自分の案件へ移植する" onClick={() => setTab("apply")} disabled={completed < 6} />
+  </div>;
+}
+
 function Practice({ day, state, setAnswer, setTab }: { day: Day; state: CourseState; setAnswer: (k: string, v: string) => void; setTab: (s: string) => void }) {
   return <div className="content-flow">
     <SectionHead index="G" eyebrow="USE CASE → SAMPLE → PATTERN" title="実例と模範を先にインストールする。" text="一から正解を発明しません。ケース、プロの答え、転用できる型を同じ画面で読み、自分の言葉で一度だけ再現します。" />
@@ -594,6 +840,7 @@ function Practice({ day, state, setAnswer, setTab }: { day: Day; state: CourseSt
 
 function Apply({ day, state, setAnswer, setTab }: { day: Day; state: CourseState; setAnswer: (k: string, v: string) => void; setTab: (s: string) => void }) {
   const key = `d${day.day}-transfer`;
+  const transferModels = day.day === 2 ? dayTwoRoomSteps.slice(1, 6).map(step => step.model) : day.drills.map(drill => drill.model);
   return <div className="content-flow">
     <SectionHead index="I" eyebrow="TRANSFER PRACTICE" title="今日は、この能力だけを自分の案件へ。" text="大きな診断書を毎日完成させません。今日つくった部品を、統合ファイルへ一つ追加します。" />
     <section className="transfer-card">
@@ -602,7 +849,7 @@ function Apply({ day, state, setAnswer, setTab }: { day: Day; state: CourseState
       <p>実名や機密情報は避け、判断に必要な文脈だけを書いてください。</p>
       <div className="transfer-pair">
         <textarea value={state.answers[key] || ""} onChange={e => setAnswer(key, e.target.value)} placeholder="左で学んだ型を、自分の実案件へ置き換える…" />
-        <div className="transfer-model"><small>書き方の見本 · 今日のケースなら</small><h3>{day.case.name}</h3>{day.drills.map((drill, i) => <p key={drill.model}><b>{i + 1}</b>{drill.model}</p>)}</div>
+        <div className="transfer-model"><small>書き方の見本 · 今日のケースなら</small><h3>{day.case.name}</h3>{transferModels.map((model, i) => <p key={model}><b>{i + 1}</b>{model}</p>)}</div>
       </div>
       <div className="save-note"><Icon name="portfolio" /><span>保存先</span><strong>{day.output}</strong><em>入力内容はこのブラウザに自動保存されます。</em></div>
     </section>
@@ -612,6 +859,46 @@ function Apply({ day, state, setAnswer, setTab }: { day: Day; state: CourseState
 }
 
 function Pass({ day, state, toggleCheck, score, completeDay }: { day: Day; state: CourseState; toggleCheck: (k: string) => void; score: number; completeDay: () => void }) {
+  if (day.day === 1) {
+    const assessment = assessDayOne(state);
+    const dimensions = [
+      ["Evidence", "10-Kの製品・Subscription・会員・在庫を数値で比較", 15],
+      ["Causality", "3つ以上の競合仮説に支持／棄却条件がある", 15],
+      ["Data Request", "保有部署・資料名・列・粒度・期限がある", 15],
+      ["Commerciality", "売上だけでなくCAC・LTV・粗利・在庫キャッシュへ接続", 15],
+      ["Experiment", "介入群／比較群、先行・遅行KPI、ガードレールがある", 15],
+      ["Decision", "継続・中止・Pivotを数値閾値で先に固定", 15],
+    ];
+    return <div className="content-flow">
+      <SectionHead index="J" eyebrow="SUBSTANTIVE ASSESSMENT" title="入力有無ではなく、案件を動かせる品質で採点する。" text="各15点は答案内の具体要件を満たした時だけ加点し、全6項目を満たした場合のみ統合力10点が加わります。" />
+      <section className="assessment quality-assessment">
+        <div className="score-ring" style={{ "--score": `${score * 3.6}deg` } as React.CSSProperties}><div><b>{score}</b><span>/ 100</span><small>{score >= 75 ? "PASS READY" : "REVISION REQUIRED"}</small></div></div>
+        <div className="quality-grid">{dimensions.map(([name, desc, points], i) => <div className={assessment.criteria[i] ? "met" : ""} key={String(name)}><span>{assessment.criteria[i] ? "✓" : String(i + 1).padStart(2, "0")}</span><p><b>{name}</b>{desc}</p><em>{points} pts</em></div>)}</div>
+      </section>
+      <section className="decision-gate"><small>PASS GATE</small><h3>75点だけでは足りません。</h3><p>Evidence・Causality・Experiment・Decisionのいずれかが欠ける答案は、合計点に関係なく実務投入不可。案件ルームへ戻り、欠けた判断を本文に追記してください。</p></section>
+      <button className="complete-button" disabled={score < 90} onClick={completeDay}>{score >= 90 ? <><Icon name="check" /> Day 1を完了して次へ</> : <>案件ルームへ戻り、あと {90 - score} 点を実質修正する</>}</button>
+    </div>;
+  }
+  if (day.day === 2) {
+    const assessment = assessDayTwo(state);
+    const dimensions = [
+      ["Decision Link", "Day 1の経営判断とEvidence Logの用途が接続", 15],
+      ["Semantic Separation", "観測・引用・計算・解釈・仮説・予測を分離", 15],
+      ["Evidence State", "confirmed／contradicted／unverifiedと出所を記録", 15],
+      ["Scope Control", "一社事例の適用範囲と一般化限界を明示", 15],
+      ["Next Evidence", "部署・資料名・列・粒度・期限まで指定", 15],
+      ["Partner Synthesis", "分かる／未確認／次証拠／Day 3への引継ぎを統合", 15],
+    ];
+    return <div className="content-flow">
+      <SectionHead index="J" eyebrow="SUBSTANTIVE ASSESSMENT" title="分類数ではなく、誤診を止める証拠設計で採点する。" text="原因を当てたかではなく、確認済みの範囲、未確認の推論、一般化限界、次に取る識別証拠が答案内に存在するかを判定します。" />
+      <section className="assessment quality-assessment">
+        <div className="score-ring" style={{ "--score": `${score * 3.6}deg` } as React.CSSProperties}><div><b>{score}</b><span>/ 100</span><small>{score >= 90 ? "PASS READY" : "REVISION REQUIRED"}</small></div></div>
+        <div className="quality-grid">{dimensions.map(([name, desc, points], i) => <div className={assessment.criteria[i] ? "met" : ""} key={String(name)}><span>{assessment.criteria[i] ? "✓" : String(i + 1).padStart(2, "0")}</span><p><b>{name}</b>{desc}</p><em>{points} pts</em></div>)}</div>
+      </section>
+      <section className="decision-gate"><small>PASS GATE</small><h3>事実と解釈を分けただけでは未完成です。</h3><p>Decision Link・Evidence State・Scope Control・Next Evidenceのどれかが欠ける場合、合計点に関係なくDay 3へ進めません。原因帰属や責任判断は書き足さず、証拠の境界と次の取得指示を修正してください。</p></section>
+      <button className="complete-button" disabled={score < 90} onClick={completeDay}>{score >= 90 ? <><Icon name="check" /> Day 2を完了して次へ</> : <>案件ルームへ戻り、あと {90 - score} 点を実質修正する</>}</button>
+    </div>;
+  }
   const checks = [
     ["最低合格", day.rubric.pass],
     ["標準レベル", day.rubric.standard],
